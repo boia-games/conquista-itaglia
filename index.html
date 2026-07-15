@@ -4,42 +4,60 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>La Conquista delle Province d'ITAGLIA</title>
-<meta name="description" content="Visualizzatore giorno per giorno della conquista delle province italiane su r/ITAGLIA.">
+<meta name="description" content="Come cambia giorno per giorno la mappa delle province italiane nel gioco su r/ITAGLIA.">
 <style>
   html{-webkit-text-size-adjust:100%}
   body{margin:0;background:#fff;color:#161616;font-family:Georgia,'Times New Roman',Times,serif;font-size:17px;line-height:1.55}
-  .page{max-width:760px;margin:0 auto;padding:32px 22px 90px}
+  .page{max-width:1080px;margin:0 auto;padding:30px 22px 80px}
   h1{font-size:27px;font-weight:700;margin:0 0 4px}
-  h2{font-size:19px;font-weight:700;margin:34px 0 10px}
   p{margin:0 0 10px}
   .sub{color:#444;font-style:italic;margin:0 0 6px}
   .src{color:#666;font-size:14px;margin:0}
   a{color:#161616}
-  hr{border:0;border-top:1px solid #d8d8d8;margin:22px 0}
-  .rule-strong{border-top:2px solid #161616;margin:18px 0}
   .muted{color:#666}
   .small{font-size:14px}
+  hr{border:0;border-top:1px solid #d8d8d8;margin:18px 0}
 
-  figure{margin:14px 0 10px;text-align:center}
-  .maps{position:relative;width:min(520px,86vw);aspect-ratio:840/1050;margin:0 auto;border:1px solid #cfcfcf;background:#fff}
+  .headrule{border-top:2px solid #161616;margin:16px 0 22px}
+  .cols{display:grid;grid-template-columns:minmax(300px,430px) 1fr;gap:30px;align-items:start}
+  .left{position:sticky;top:16px;align-self:start}
+  @media(max-width:840px){
+    .cols{grid-template-columns:1fr;gap:8px}
+    .left{position:static}
+    .controls{position:fixed;left:0;right:0;bottom:0;margin:0;background:#fff;border-top:1px solid #161616;box-shadow:0 -2px 10px rgba(0,0,0,.10);padding:8px 8px;z-index:20;gap:7px}
+    .hint{display:none}
+    .page{padding-bottom:108px}
+    input[type=range]{flex:1 1 120px;min-width:100px;max-width:none}
+  }
+
+  figure{margin:0 0 10px;text-align:center}
+  .maps{position:relative;width:100%;aspect-ratio:840/1050;margin:0 auto;border:1px solid #cfcfcf;background:#fff}
   .maps img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity .12s linear}
   .maps img.on{opacity:1}
   figcaption{margin-top:8px;font-size:15px;color:#333}
   figcaption b{font-weight:700}
 
-  .controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;margin:8px 0 4px}
+  .controls{display:flex;align-items:center;gap:9px;flex-wrap:wrap;justify-content:center;margin:8px 0 4px}
   button{font-family:inherit;font-size:15px;background:#fff;color:#161616;border:1px solid #161616;padding:5px 12px;cursor:pointer;border-radius:0}
   button:hover{background:#f0f0f0}
   button.play{min-width:82px}
-  input[type=range]{width:200px;max-width:46vw;accent-color:#161616}
+  input[type=range]{width:170px;max-width:60vw;accent-color:#161616}
   select{font-family:inherit;font-size:15px;border:1px solid #161616;background:#fff;padding:4px 6px;border-radius:0}
   label.ctl{font-family:inherit;font-size:15px;display:inline-flex;align-items:center;gap:6px;color:#333;cursor:pointer}
-  .dayreadout{font-size:14px;color:#555;text-align:center;margin:2px 0 0}
+  .hint{font-size:13.5px;color:#666;text-align:center;margin:4px 0 0}
 
-  .win{font-weight:700;text-decoration:underline}
-  .tag{font-style:italic;color:#555}
+  .match{margin-top:16px;border-top:1px solid #d8d8d8;padding-top:12px}
+  .match h2{font-size:18px;margin:0 0 8px}
   .match .lead{font-size:18px}
   .match .prev{color:#333}
+  .win{font-weight:700;text-decoration:underline}
+
+  .panel{border-top:1px solid #d8d8d8}
+  .panel:first-child{border-top:0}
+  .panel>summary{cursor:pointer;font-weight:700;font-size:18px;padding:12px 2px;user-select:none;list-style-position:outside}
+  .panel>summary::marker{color:#999}
+  .panel .body{padding:0 2px 16px}
+  .panel[open]>summary{margin-bottom:2px}
 
   table{border-collapse:collapse;width:100%;font-size:15px}
   th,td{text-align:left;padding:6px 8px;border-bottom:1px solid #e2e2e2;vertical-align:top}
@@ -50,8 +68,8 @@
   tr.cur td{background:#efefef}
   tr.cur td:first-child{box-shadow:inset 3px 0 0 #161616}
   .members{color:#555}
-  .bar{display:inline-block;height:10px;background:#161616;vertical-align:middle}
-  .bartrack{display:inline-block;width:110px;height:10px;background:#efefef;border:1px solid #d0d0d0;vertical-align:middle;margin-right:6px}
+  .bar{display:inline-block;height:10px;vertical-align:middle}
+  .bartrack{display:inline-block;width:90px;height:10px;background:#efefef;border:1px solid #d0d0d0;vertical-align:middle}
   .bartrack .bar{display:block;height:10px}
   .sw{display:inline-block;width:11px;height:11px;border:1px solid #8a8a8a;margin-right:6px;vertical-align:-1px}
 
@@ -62,8 +80,8 @@
   .filters .sep{color:#bbb;margin:0 7px}
 
   .trend svg{display:block;margin:6px 0}
-  .toggle-all{font-size:14px;display:inline-block;margin-top:8px}
-  .foot{margin-top:40px;color:#777;font-size:13.5px;line-height:1.7;border-top:1px solid #d8d8d8;padding-top:14px}
+  .toggle-all{font-size:14px;display:inline-block;margin-top:8px;cursor:pointer}
+  .foot{margin-top:34px;color:#777;font-size:13.5px;line-height:1.7;border-top:1px solid #d8d8d8;padding-top:14px}
   .err{border:1px solid #161616;padding:14px 16px;font-size:15px;background:#fafafa}
   code{font-family:'Courier New',monospace;font-size:14px;background:#f2f2f2;padding:1px 4px}
 </style>
@@ -73,32 +91,21 @@
   <h1 id="title">La Conquista delle Province d'ITAGLIA</h1>
   <p class="sub" id="subtitle"></p>
   <p class="src" id="src"></p>
+  <div class="headrule"></div>
   <div id="app"></div>
   <div class="foot" id="foot"></div>
 </div>
 
 <script>
-let DATA=null, DAYS=[], CUR=1, PLAY=false, TIMER=null, SPEED=1400, SPOIL=true, LOGFILTER='all', EMPALL=false;
-let UI={};
+let DATA=null, DAYS=[], CUR=1, PLAY=false, TIMER=null, SPEED=900, SPOIL=true, LOGFILTER='all', EMPALL=false, LOOP=false;
+let UI={}, PANEL_OPEN={rimaste:true,imperi:true,regione:true,registro:true};
 const $=(s,r=document)=>r.querySelector(s);
 const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
-const regionOf=p=>DATA.regionOf[p]||'—';
+const regionOf=p=>DATA.regionOf[p]||'-';
 const regColor=r=>(DATA.regionColors&&DATA.regionColors[r])||'#e6e6e6';
 const provColor=p=>regColor(regionOf(p));
 const sw=c=>'<span class="sw" style="background:'+c+'"></span>';
-
-function marginInfo(scores,winner,losers){
-  const w=scores[winner]; const best=Math.max(...losers.map(l=>scores[l]??0));
-  if(best===0 && w>0) return {t:'cappotto'};
-  const ratio=best>0? w/best : 99, gap=w-best;
-  if(ratio>=3) return {t:'schiacciante'};
-  if(ratio>=1.6) return {t:'netto'};
-  if(gap<=6 || ratio<1.15) return {t:'all’ultimo voto'};
-  return {t:'combattuto'};
-}
-const isClose=t=>t==='combattuto'||t==='all’ultimo voto';
-const isCrush=t=>t==='schiacciante'||t==='cappotto';
 
 function stateBefore(uptoDay){
   const parent={}, size={};
@@ -111,96 +118,147 @@ function stateBefore(uptoDay){
   return {parent,size,find,blocks,elim};
 }
 
-/* build persistent shell once */
 function buildShell(){
   const app=$('#app'); app.innerHTML='';
+  const cols=el('div','cols');
+  const left=el('div','left'), right=el('div','right');
+
   const fig=el('figure');
   const maps=el('div','maps');
   DAYS.forEach(d=>{ const img=el('img'); img.src=d.image; img.alt='Mappa giorno '+d.day; img.dataset.day=d.day; img.decoding='async'; maps.appendChild(img); });
-  // pre-decodifica tutti i fotogrammi così lo scambio è istantaneo (niente flash bianco)
   maps.querySelectorAll('img').forEach(im=>{ if(im.decode) im.decode().catch(()=>{}); });
-  const cap=el('figcaption'); fig.append(maps,cap); app.appendChild(fig);
+  const cap=el('figcaption'); fig.append(maps,cap); left.appendChild(fig);
 
   const ctr=el('div','controls');
-  const prev=el('button',null,'◀'); prev.title='Giorno precedente'; prev.onclick=()=>{stop();go(CUR-1)};
+  const prev=el('button',null,'◀'); prev.title='Immagine precedente'; prev.onclick=()=>{stop();go(CUR-1)};
   const play=el('button','play','▶ play'); play.onclick=togglePlay;
-  const next=el('button',null,'▶'); next.title='Giorno successivo'; next.onclick=()=>{stop();go(CUR+1)};
+  const stopb=el('button',null,'■'); stopb.title='Torna all’inizio'; stopb.onclick=()=>{stop();go(1)};
+  const next=el('button',null,'▶'); next.title='Immagine successiva'; next.onclick=()=>{stop();go(CUR+1)};
   const slider=el('input'); slider.type='range'; slider.min=1; slider.max=DAYS.length; slider.value=CUR; slider.oninput=e=>{stop();go(+e.target.value)};
-  const spd=el('select'); [['lento',2400],['normale',1400],['veloce',800],['turbo',400]].forEach(([t,v])=>{const o=el('option',null,t);o.value=v;if(v===SPEED)o.selected=true;spd.appendChild(o);}); spd.onchange=e=>{SPEED=+e.target.value; if(PLAY){stop();start();}};
-  const sp=el('label','ctl'); const cbx=el('input');cbx.type='checkbox';cbx.checked=SPOIL;cbx.onchange=e=>{SPOIL=e.target.checked;update();}; sp.append(cbx,document.createTextNode('mostra esiti'));
-  ctr.append(prev,play,next,slider,spd,sp);
-  app.appendChild(ctr);
-  app.appendChild(el('p','dayreadout','usa ◀ ▶ o la barra · spazio per play/pausa'));
+  const spd=el('select'); [['lento',1500],['normale',900],['veloce',500],['turbo',260]].forEach(([t,v])=>{const o=el('option',null,t);o.value=v;if(v===SPEED)o.selected=true;spd.appendChild(o);}); spd.onchange=e=>{SPEED=+e.target.value; if(PLAY){stop();start();}};
+  const lp=el('label','ctl'); const lcb=el('input');lcb.type='checkbox';lcb.checked=LOOP;lcb.onchange=e=>{LOOP=e.target.checked;}; lp.append(lcb,document.createTextNode('ripeti'));
+  const sp=el('label','ctl'); const cbx=el('input');cbx.type='checkbox';cbx.checked=SPOIL;cbx.onchange=e=>{SPOIL=e.target.checked;update();}; sp.append(cbx,document.createTextNode('mostra risultati'));
+  ctr.append(prev,play,stopb,next,slider,spd,lp,sp);
+  left.appendChild(ctr);
+  left.appendChild(el('p','hint','usa le frecce sinistra e destra per spostarti tra immagini e la barra spaziatrice per mettere play e pausa'));
 
-  const dyn=el('div'); dyn.id='dyn'; app.appendChild(dyn);
-  UI={maps,cap,play,slider,dyn};
+  const dynLeft=el('div','match'); left.appendChild(dynLeft);
+  const dynRight=el('div'); right.appendChild(dynRight);
+
+  cols.append(left,right); app.appendChild(cols);
+  UI={maps,cap,play,slider,dynLeft,dynRight};
 }
 
-/* update everything that depends on CUR (map stays put) */
+function panel(id,title,bodyNode){
+  const d=el('details','panel'); d.open=PANEL_OPEN[id];
+  d.ontoggle=()=>{PANEL_OPEN[id]=d.open;};
+  const s=el('summary',null,title); d.appendChild(s);
+  const b=el('div','body'); b.appendChild(bodyNode); d.appendChild(b);
+  return d;
+}
+
 function update(){
   const cur=DAYS.find(d=>d.day===CUR), st=stateBefore(CUR), remain=DATA.totalProvinces-st.elim;
   UI.maps.querySelectorAll('img').forEach(im=>im.classList.toggle('on',+im.dataset.day===CUR));
-  UI.cap.innerHTML='Giorno <b>'+CUR+'</b> di '+DAYS.length+' — <b>'+remain+'</b> province rimaste su '+DATA.totalProvinces;
+  UI.cap.innerHTML='Giorno <b>'+CUR+'</b> di '+DAYS.length+'. <b>'+remain+'</b> province rimaste su '+DATA.totalProvinces+'.';
   UI.play.innerHTML=PLAY?'❚❚ pausa':'▶ play';
   if(document.activeElement!==UI.slider) UI.slider.value=CUR;
 
-  const dyn=UI.dyn; dyn.innerHTML='';
-
-  /* MATCH */
-  dyn.appendChild(el('div','rule-strong'));
-  const m=el('div','match'); m.appendChild(el('h2',null,'Scontro del giorno '+CUR));
-  const typ=cur.type==='bonus';
-  m.appendChild(el('p','lead', typ
-    ? '<span class="tag">sfida bonus</span> — '+cur.contenders.map(esc).join(' · ')+' <span class="muted">(tutte contro tutte)</span>'
-    : '<b>'+esc(cur.contenders[0])+'</b> contro <b>'+esc(cur.contenders[1])+'</b>'));
-  const prevDay=DAYS.find(d=>d.day===CUR-1);
-  if(prevDay && prevDay.result){
-    const r=prevDay.result, mi=marginInfo(r.scores,r.winner,r.losers); let s;
+  /* LEFT: match */
+  const L=UI.dynLeft; L.innerHTML='';
+  L.appendChild(el('h2',null,'Scontro del giorno '+CUR));
+  if(cur.type==='bonus') L.appendChild(el('p','lead','Sfida bonus: '+cur.contenders.map(esc).join(', ')+', tutte insieme.'));
+  else L.appendChild(el('p','lead','<b>'+esc(cur.contenders[0])+'</b> contro <b>'+esc(cur.contenders[1])+'</b>'));
+  const pd=DAYS.find(d=>d.day===CUR-1);
+  if(pd && pd.result){
+    const r=pd.result; let s;
     if(SPOIL){
-      if(prevDay.type==='bonus'){
-        const rk=Object.entries(r.scores).sort((a,b)=>b[1]-a[1]).map(([p,v])=>(p===r.winner?'<span class="win">'+esc(p)+'</span>':esc(p))+' '+v).join(' · ');
-        s='Esito precedente (giorno '+prevDay.day+'): '+rk+' — <span class="tag">'+mi.t+'</span>. '+esc(r.winner)+' annette '+r.losers.length+' province.';
+      if(pd.type==='bonus'){
+        const rk=Object.entries(r.scores).sort((a,b)=>b[1]-a[1]);
+        const rest=rk.filter(([p])=>p!==r.winner).map(([p,v])=>esc(p)+' '+v).join(', ');
+        s='Giorno '+pd.day+': vince <span class="win">'+esc(r.winner)+'</span> con '+r.scores[r.winner]+' voti (poi '+rest+'). '+esc(r.winner)+' conquista '+r.losers.length+' province.';
       }else{
-        const a=prevDay.contenders[0],b=prevDay.contenders[1];
-        s='Esito precedente (giorno '+prevDay.day+'): '+(r.winner===a?'<span class="win">'+esc(a)+'</span>':esc(a))+' '+r.scores[a]+' – '+r.scores[b]+' '+(r.winner===b?'<span class="win">'+esc(b)+'</span>':esc(b))+' — <span class="tag">'+mi.t+'</span>. '+esc(r.winner)+' annette '+esc(r.losers[0])+'.';
+        const a=pd.contenders[0],b=pd.contenders[1];
+        s='Giorno '+pd.day+': '+(r.winner===a?'<span class="win">'+esc(a)+'</span>':esc(a))+' '+r.scores[a]+' - '+r.scores[b]+' '+(r.winner===b?'<span class="win">'+esc(b)+'</span>':esc(b))+'. Vince '+esc(r.winner)+' e conquista '+esc(r.losers[0])+'.';
       }
-    }else s='Esito precedente nascosto (modalità suspense).';
-    m.appendChild(el('p','prev small',s));
-  }else if(CUR===1){ m.appendChild(el('p','prev small','Mappa iniziale: 107 province indipendenti.')); }
-  if(!cur.result) m.appendChild(el('p','small muted','Votazione in corso — nessun esito ancora.'));
-  dyn.appendChild(m);
+    }else s='Risultato nascosto (modo sorpresa).';
+    L.appendChild(el('p','prev small',s));
+  }else if(CUR===1){ L.appendChild(el('p','prev small','Mappa iniziale, tutte le 107 province ancora in piedi.')); }
+  if(!cur.result) L.appendChild(el('p','small muted','Votazione ancora in corso, non c’è un risultato.'));
 
-  /* PROVINCE RIMASTE */
-  dyn.appendChild(el('hr')); dyn.appendChild(el('h2',null,'Province rimaste'));
-  dyn.appendChild(el('p','small','Da <b>'+DATA.totalProvinces+'</b> province iniziali a <b>'+remain+'</b> ('+(DATA.totalProvinces-remain)+' annesse in '+(CUR-1)+' scontri risolti).'));
-  const tr=el('div','trend'); tr.innerHTML=trendSVG(); dyn.appendChild(tr);
+  /* RIGHT: panels */
+  const R=UI.dynRight; R.innerHTML='';
 
-  /* IMPERI */
-  dyn.appendChild(el('hr')); dyn.appendChild(el('h2',null,'Imperi'));
+  const pr=el('div');
+  pr.appendChild(el('p','small','Si parte da <b>'+DATA.totalProvinces+'</b> province. Adesso ne restano <b>'+remain+'</b> ('+(DATA.totalProvinces-remain)+' conquistate in '+(CUR-1)+' scontri).'));
+  const tr=el('div','trend'); tr.innerHTML=trendSVG(); pr.appendChild(tr);
+  R.appendChild(panel('rimaste','Province rimaste',pr));
+
+  R.appendChild(panel('imperi','Imperi',imperiBody(st)));
+  R.appendChild(panel('regione','Conquiste per regione',regionBody(st)));
+  R.appendChild(panel('registro','Registro battaglie',registroBody()));
+}
+
+function imperiBody(st){
+  const wrap=el('div');
   let blist=Object.values(st.blocks).map(mem=>({root:st.find(mem[0]),members:mem.slice().sort((a,b)=>a.localeCompare(b))}));
   blist.sort((a,b)=>b.members.length-a.members.length||a.root.localeCompare(b.root));
   const multi=blist.filter(b=>b.members.length>1);
-  dyn.appendChild(el('p','small muted','Una provincia "capitale" più i territori che ha annesso. '+multi.length+' imperi attivi'+(multi.length?', il più grande '+multi[0].members.length+' province':'')+'.'));
+  wrap.appendChild(el('p','small muted','Ogni riga è una provincia che ne ha conquistate altre, con la lista dei territori presi. Adesso ci sono '+multi.length+' imperi'+(multi.length?', il più grande ha '+multi[0].members.length+' province':'')+'.'));
   const shown=EMPALL?blist:multi;
   if(shown.length){
-    const t=el('table'); t.innerHTML='<thead><tr><th class="n">#</th><th>Capitale</th><th>Regione</th><th class="n">Prov.</th><th>Territori annessi</th></tr></thead>';
+    const t=el('table'); t.innerHTML='<thead><tr><th class="n">#</th><th>Provincia</th><th>Regione</th><th class="n">Tot.</th><th>Province conquistate</th></tr></thead>';
     const tb=el('tbody');
     shown.forEach((b,i)=>{ const others=b.members.filter(x=>x!==b.root); const row=el('tr');
-      row.innerHTML='<td class="n">'+(i+1)+'</td><td>'+sw(provColor(b.root))+'<b>'+esc(b.root)+'</b></td><td class="muted">'+esc(regionOf(b.root))+'</td><td class="n">'+b.members.length+'</td><td class="members small">'+(others.length?others.map(esc).join(', '):'<span class="muted">—</span>')+'</td>';
+      row.innerHTML='<td class="n">'+(i+1)+'</td><td>'+sw(provColor(b.root))+'<b>'+esc(b.root)+'</b></td><td class="muted">'+esc(regionOf(b.root))+'</td><td class="n">'+b.members.length+'</td><td class="members small">'+(others.length?others.map(esc).join(', '):'<span class="muted">-</span>')+'</td>';
       tb.appendChild(row); });
-    t.appendChild(tb); dyn.appendChild(t);
-  }else dyn.appendChild(el('p','small muted','Nessuna annessione ancora.'));
-  const tgl=el('a','toggle-all',EMPALL?'▲ mostra solo gli imperi':'▼ mostra tutte le '+blist.length+' province sopravvissute');
-  tgl.href='javascript:void 0'; tgl.onclick=()=>{EMPALL=!EMPALL;update();}; dyn.appendChild(tgl);
+    t.appendChild(tb); wrap.appendChild(t);
+  }else wrap.appendChild(el('p','small muted','Ancora nessuna conquista.'));
+  const tgl=el('a','toggle-all',EMPALL?'mostra solo gli imperi':'mostra tutte le '+blist.length+' province rimaste');
+  tgl.href='javascript:void 0'; tgl.onclick=()=>{EMPALL=!EMPALL;update();}; wrap.appendChild(tgl);
+  return wrap;
+}
 
-  /* REGIONE */
-  dyn.appendChild(el('hr')); dyn.appendChild(el('h2',null,'Conquiste per regione')); dyn.appendChild(regionTable(st));
+function regionBody(st){
+  const inHouse={},taken={},lost={};
+  Object.values(st.blocks).forEach(mem=>{ const root=st.find(mem[0]),rReg=regionOf(root);
+    mem.forEach(m=>{ const mReg=regionOf(m); if(mReg===rReg)inHouse[rReg]=(inHouse[rReg]||0)+1; else {taken[rReg]=(taken[rReg]||0)+1;lost[mReg]=(lost[mReg]||0)+1;} }); });
+  const regs=new Set([...Object.keys(inHouse),...Object.keys(taken),...Object.keys(lost)]);
+  let rows=[...regs].map(r=>({r,ctrl:(inHouse[r]||0)+(taken[r]||0),cross:(taken[r]||0),lost:(lost[r]||0)}));
+  rows.sort((a,b)=>b.ctrl-a.ctrl||b.cross-a.cross||a.r.localeCompare(b.r));
+  const wrap=el('div');
+  if(!rows.length){ wrap.appendChild(el('p','small muted','Ancora nessuna conquista.')); return wrap; }
+  const max=Math.max(1,...rows.map(r=>r.ctrl));
+  wrap.appendChild(el('p','small muted','Quante province tiene in mano oggi ogni regione. "Fuori regione" sono quelle prese ad altre regioni, "perse" quelle che le hanno tolto.'));
+  const t=el('table'); t.innerHTML='<thead><tr><th>Regione</th><th></th><th class="n">Tot.</th><th class="n">Fuori reg.</th><th class="n">Perse</th></tr></thead>';
+  const tb=el('tbody');
+  rows.forEach(o=>{ const w=Math.round(o.ctrl/max*90); const row=el('tr');
+    row.innerHTML='<td>'+sw(regColor(o.r))+esc(o.r)+'</td><td><span class="bartrack"><span class="bar" style="width:'+w+'px;background:'+regColor(o.r)+'"></span></span></td><td class="n">'+o.ctrl+'</td><td class="n">'+(o.cross||'-')+'</td><td class="n">'+(o.lost||'-')+'</td>';
+    tb.appendChild(row); });
+  t.appendChild(tb); wrap.appendChild(t); return wrap;
+}
 
-  /* LOG */
-  dyn.appendChild(el('hr')); dyn.appendChild(el('h2',null,'Registro battaglie'));
+function registroBody(){
+  const wrap=el('div');
   const filt=el('p','filters');
-  [['all','Tutte'],['duel','Duelli'],['bonus','Bonus'],['crush','Schiaccianti'],['close','Combattute']].forEach(([k,t],i)=>{ if(i)filt.appendChild(el('span','sep','·')); const a=el('a',(LOGFILTER===k?'active':''),t); a.href='javascript:void 0'; a.onclick=()=>{LOGFILTER=k;update();}; filt.appendChild(a); });
-  dyn.appendChild(filt); dyn.appendChild(buildLog());
+  [['all','Tutte'],['duel','Duelli'],['bonus','Bonus']].forEach(([k,t],i)=>{ if(i)filt.appendChild(el('span','sep','·')); const a=el('a',(LOGFILTER===k?'active':''),t); a.href='javascript:void 0'; a.onclick=()=>{LOGFILTER=k;update();}; filt.appendChild(a); });
+  wrap.appendChild(filt);
+  const t=el('table'); t.innerHTML='<thead><tr><th class="n">G.</th><th>Scontro</th><th>Risultato</th></tr></thead>';
+  const tb=el('tbody');
+  DAYS.filter(d=>d.result).forEach(d=>{
+    if(LOGFILTER==='duel'&&d.type!=='duel')return; if(LOGFILTER==='bonus'&&d.type!=='bonus')return;
+    const r=d.result; let scontro,ris;
+    if(d.type==='bonus'){ scontro='bonus: '+esc(r.winner)+' e altre '+d.contenders.filter(c=>c!==r.winner).length; ris='<span class="win">'+esc(r.winner)+'</span> conquista '+r.losers.length+' province'; }
+    else{ const a=d.contenders[0],b=d.contenders[1]; scontro=esc(a)+' - '+esc(b); ris=(r.winner===a?'<span class="win">'+esc(a)+'</span>':'<span class="win">'+esc(b)+'</span>')+' '+r.scores[a]+'-'+r.scores[b]; }
+    const row=el('tr','clk'+(d.day===CUR?' cur':'')); row.innerHTML='<td class="n">'+d.day+'</td><td>'+scontro+'</td><td>'+ris+'</td>';
+    row.onclick=()=>{stop();go(Math.min(DAYS.length,d.day+1))}; tb.appendChild(row);
+  });
+  const pend=DAYS.find(d=>!d.result);
+  if(pend && (LOGFILTER==='all'||(LOGFILTER==='duel'&&pend.type==='duel')||(LOGFILTER==='bonus'&&pend.type==='bonus'))){
+    const row=el('tr','clk'+(pend.day===CUR?' cur':'')); row.innerHTML='<td class="n">'+pend.day+'</td><td>'+esc(pend.contenders.join(' - '))+'</td><td class="muted">in corso</td>';
+    row.onclick=()=>{stop();go(pend.day)}; tb.appendChild(row);
+  }
+  t.appendChild(tb); wrap.appendChild(t); return wrap;
 }
 
 function trendSVG(){
@@ -224,48 +282,9 @@ function trendSVG(){
     '<text x="'+(W-padR)+'" y="'+(H-4)+'" font-size="10" fill="#888" text-anchor="end">g.'+DAYS.length+'</text></svg>';
 }
 
-function regionTable(st){
-  const inHouse={},taken={},lost={};
-  Object.values(st.blocks).forEach(mem=>{ const root=st.find(mem[0]),rReg=regionOf(root);
-    mem.forEach(m=>{ const mReg=regionOf(m); if(mReg===rReg)inHouse[rReg]=(inHouse[rReg]||0)+1; else {taken[rReg]=(taken[rReg]||0)+1;lost[mReg]=(lost[mReg]||0)+1;} }); });
-  const regs=new Set([...Object.keys(inHouse),...Object.keys(taken),...Object.keys(lost)]);
-  let rows=[...regs].map(r=>({r,ctrl:(inHouse[r]||0)+(taken[r]||0),cross:(taken[r]||0),lost:(lost[r]||0)}));
-  rows.sort((a,b)=>b.ctrl-a.ctrl||b.cross-a.cross||a.r.localeCompare(b.r));
-  if(!rows.length) return el('p','small muted','Nessuna conquista ancora.');
-  const max=Math.max(1,...rows.map(r=>r.ctrl)); const wrap=el('div');
-  wrap.appendChild(el('p','small muted','Territori controllati oggi da una capitale di quella regione; “fuori regione” = strappati ad altre regioni.'));
-  const t=el('table'); t.innerHTML='<thead><tr><th>Regione</th><th>Controllo</th><th class="n">Tot.</th><th class="n">Fuori reg.</th><th class="n">Perse</th></tr></thead>';
-  const tb=el('tbody');
-  rows.forEach(o=>{ const w=Math.round(o.ctrl/max*110); const row=el('tr');
-    row.innerHTML='<td>'+sw(regColor(o.r))+esc(o.r)+'</td><td><span class="bartrack"><span class="bar" style="width:'+w+'px;background:'+regColor(o.r)+'"></span></span></td><td class="n">'+o.ctrl+'</td><td class="n">'+(o.cross||'—')+'</td><td class="n">'+(o.lost||'—')+'</td>';
-    tb.appendChild(row); });
-  t.appendChild(tb); wrap.appendChild(t); return wrap;
-}
-
-function buildLog(){
-  const t=el('table'); t.innerHTML='<thead><tr><th class="n">G.</th><th>Scontro</th><th>Esito</th><th>Margine</th></tr></thead>';
-  const tb=el('tbody');
-  DAYS.filter(d=>d.result).forEach(d=>{
-    const r=d.result, mi=marginInfo(r.scores,r.winner,r.losers);
-    if(LOGFILTER==='duel'&&d.type!=='duel')return; if(LOGFILTER==='bonus'&&d.type!=='bonus')return;
-    if(LOGFILTER==='crush'&&!isCrush(mi.t))return; if(LOGFILTER==='close'&&!isClose(mi.t))return;
-    let scontro,esito;
-    if(d.type==='bonus'){ scontro='<span class="tag">bonus</span> '+esc(r.winner)+' + '+d.contenders.filter(c=>c!==r.winner).length+' sfid.'; esito='<span class="win">'+esc(r.winner)+'</span> annette '+r.losers.length+' prov.'; }
-    else{ const a=d.contenders[0],b=d.contenders[1]; scontro=esc(a)+' – '+esc(b); esito=(r.winner===a?'<span class="win">'+esc(a)+'</span>':'<span class="win">'+esc(b)+'</span>')+' '+r.scores[a]+'–'+r.scores[b]; }
-    const row=el('tr','clk'+(d.day===CUR?' cur':'')); row.innerHTML='<td class="n">'+d.day+'</td><td>'+scontro+'</td><td>'+esito+'</td><td class="tag">'+mi.t+'</td>';
-    row.onclick=()=>{stop();go(Math.min(DAYS.length,d.day+1))}; tb.appendChild(row);
-  });
-  const pend=DAYS.find(d=>!d.result);
-  if(pend && (LOGFILTER==='all'||(LOGFILTER==='duel'&&pend.type==='duel')||(LOGFILTER==='bonus'&&pend.type==='bonus'))){
-    const row=el('tr','clk'+(pend.day===CUR?' cur':'')); row.innerHTML='<td class="n">'+pend.day+'</td><td>'+esc(pend.contenders.join(' – '))+'</td><td class="muted">in corso</td><td class="tag">—</td>';
-    row.onclick=()=>{stop();go(pend.day)}; tb.appendChild(row);
-  }
-  t.appendChild(tb); return t;
-}
-
 function go(day){ day=Math.max(1,Math.min(DAYS.length,day)); CUR=day; update(); }
-function start(){ PLAY=true; TIMER=setInterval(()=>{ if(CUR>=DAYS.length){stop();update();return;} go(CUR+1); },SPEED); update(); }
-function stop(){ PLAY=false; if(TIMER){clearInterval(TIMER);TIMER=null;} update && UI.play && (UI.play.innerHTML='▶ play'); }
+function start(){ PLAY=true; TIMER=setInterval(()=>{ if(CUR>=DAYS.length){ if(LOOP){go(1);} else {stop();update();} return;} go(CUR+1); },SPEED); update(); }
+function stop(){ PLAY=false; if(TIMER){clearInterval(TIMER);TIMER=null;} if(UI.play) UI.play.innerHTML='▶ play'; }
 function togglePlay(){ if(PLAY){stop();} else { if(CUR>=DAYS.length)CUR=1; start(); } }
 document.addEventListener('keydown',e=>{
   if(e.target && /input|select|textarea/i.test(e.target.tagName))return;
@@ -276,15 +295,18 @@ document.addEventListener('keydown',e=>{
 
 function boot(data){
   DATA=data; DAYS=data.days.slice().sort((a,b)=>a.day-b.day); CUR=DAYS.length;
-  $('#title').textContent=data.title; $('#subtitle').textContent=data.subtitle||'';
+  $('#title').textContent=data.title;
+  $('#subtitle').textContent=data.subtitle||'';
   const s=data.source||{};
-  $('#src').innerHTML=(s.subreddit?'Fonte: <a href="'+(s.url||'#')+'">'+esc(s.subreddit)+'</a>':'')+(s.author?' · '+esc(s.author):'');
+  const sub=s.subreddit?'<a href="'+(s.url||'#')+'">'+esc(s.subreddit)+'</a>':'';
+  const aut=s.author?'<a href="'+(s.authorUrl||'#')+'">'+esc(s.author)+'</a>':'';
+  $('#src').innerHTML='Dati da '+sub+(aut?', di '+aut:'');
   const rem=DATA.totalProvinces-stateBefore(DAYS.length).elim;
-  $('#foot').innerHTML='Mappe e dati dalla serie di '+esc(s.author||'')+' su '+esc(s.subreddit||'Reddit')+'. Visualizzatore non ufficiale (fan-project); le mappe sono dell’autore originale.<br>Aggiornato al giorno '+DAYS.length+' — '+rem+' province ancora in gioco.';
+  $('#foot').innerHTML='Mappe e dati dalla serie di '+aut+' su '+sub+'. Sito fatto da un fan, non ufficiale, le mappe sono sue.<br>Aggiornato al giorno '+DAYS.length+', '+rem+' province ancora in gioco.';
   buildShell(); update();
 }
 fetch('./data.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error(r.status);return r.json();}).then(boot)
- .catch(err=>{ $('#app').innerHTML='<div class="err"><b>Impossibile caricare data.json.</b><br>Se apri il file con doppio-clic (file://) il browser blocca la lettura del JSON. Avvia un server nella cartella:<br><br><code>python3 -m http.server 8080</code><br><br>e apri <code>http://localhost:8080</code>. Su GitHub Pages funziona senza fare nulla.<br><span class="muted small">('+esc(err)+')</span></div>'; });
+ .catch(err=>{ $('#app').innerHTML='<div class="err"><b>Non riesco a caricare data.json.</b><br>Se apri il file con doppio clic (file://) il browser blocca la lettura. Avvia un piccolo server nella cartella:<br><br><code>python3 -m http.server 8080</code><br><br>e apri <code>http://localhost:8080</code>. Online (GitHub Pages) funziona senza fare niente.<br><span class="muted small">('+esc(err)+')</span></div>'; });
 </script>
 </body>
 </html>
