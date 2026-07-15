@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin — Aggiungi giorno · Conquista ITAGLIA</title>
+<style>
+  body{margin:0;background:#fff;color:#161616;font-family:Georgia,'Times New Roman',Times,serif;font-size:17px;line-height:1.55}
+  .page{max-width:720px;margin:0 auto;padding:32px 22px 90px}
+  h1{font-size:24px;margin:0 0 6px}
+  h2{font-size:18px;margin:0 0 10px}
+  p{margin:0 0 10px}
+  .lead{color:#444;font-style:italic}
+  .src{color:#666;font-size:14px}
+  hr{border:0;border-top:1px solid #d8d8d8;margin:26px 0}
+  .rule-strong{border-top:2px solid #161616;margin:8px 0 18px}
+  label{display:block;font-size:14px;color:#333;margin:12px 0 4px}
+  input[type=text],input[type=number],select{font-family:inherit;font-size:16px;border:1px solid #161616;background:#fff;color:#161616;padding:6px 8px;border-radius:0;width:100%}
+  input[type=file]{font-family:inherit;font-size:14px}
+  .row{display:flex;gap:12px;flex-wrap:wrap}
+  button{font-family:inherit;font-size:15px;background:#fff;border:1px solid #161616;color:#161616;padding:6px 13px;cursor:pointer;border-radius:0}
+  button:hover{background:#f0f0f0}
+  button:disabled{color:#aaa;border-color:#bbb;cursor:default}
+  .muted{color:#666;font-size:14px}
+  .step{margin:0 0 8px}
+  .num{font-weight:700}
+  .contender{display:flex;gap:10px;align-items:center;margin-bottom:8px}
+  .contender .nm{flex:2}.contender .rg{flex:1.4}.contender .sc{flex:.7;text-align:center}
+  .contender .win{font-size:14px;color:#333;white-space:nowrap;display:inline-flex;gap:5px;align-items:center}
+  .contender .del{flex:none;border:1px solid #999;color:#900;background:#fff;padding:2px 8px;font-size:14px}
+  .preview{margin-top:10px}
+  .preview img{max-width:200px;border:1px solid #cfcfcf}
+  .ok{color:#0a6b2e}
+  .warn{border:1px solid #161616;background:#fafafa;padding:10px 12px;font-size:14px;margin-top:10px}
+  .err{border:1px solid #900;background:#fff7f7;color:#900;padding:10px 12px;font-size:14px;margin-top:10px}
+  code{font-family:'Courier New',monospace;font-size:14px;background:#f2f2f2;padding:1px 4px}
+  pre{font-family:'Courier New',monospace;font-size:14px;background:#f7f7f7;border:1px solid #ddd;padding:12px;overflow:auto}
+  a{color:#161616}
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Aggiungi un giorno</h1>
+  <p class="lead">Strumento locale. Non scrive nulla online: prepara l'immagine ottimizzata e il data.json aggiornato, che poi committi tu sul repo. Solo chi ha accesso in scrittura al repo può pubblicare.</p>
+  <div class="rule-strong"></div>
+
+  <h2><span class="num">1.</span> Carica i dati attuali</h2>
+  <p class="muted">Provo a leggere <code>./data.json</code> dalla stessa cartella. Se apri il file con doppio-clic, caricalo a mano.</p>
+  <div class="row">
+    <button id="reload">Rileggi ./data.json</button>
+    <input type="file" id="fileData" accept="application/json,.json">
+  </div>
+  <p id="dataStatus" class="muted"></p>
+
+  <hr>
+  <h2><span class="num">2.</span> Esito dello scontro in sospeso</h2>
+  <div id="pendingBody"><p class="muted">Carica prima i dati…</p></div>
+
+  <hr>
+  <h2><span class="num">3.</span> Nuovo scontro</h2>
+  <div class="row">
+    <div style="flex:none;width:110px"><label>Giorno</label><input type="number" id="newDay" min="1"></div>
+    <div style="flex:none;width:170px"><label>Tipo</label>
+      <select id="newType"><option value="duel">Duello (2)</option><option value="bonus">Bonus (più province)</option></select>
+    </div>
+  </div>
+  <label>Province in sfida <span class="muted">(la regione si autocompila se già nota)</span></label>
+  <div id="newContenders"></div>
+  <button id="addContender">+ aggiungi provincia</button>
+  <label style="margin-top:16px">Immagine mappa del nuovo giorno <span class="muted">(png/jpg/webp — la ottimizzo a WebP 840px)</span></label>
+  <input type="file" id="imgInput" accept="image/*">
+  <div class="preview" id="imgPreview"></div>
+
+  <hr>
+  <h2><span class="num">4.</span> Genera i file da committare</h2>
+  <div class="row">
+    <button id="genImg" disabled>Scarica immagine ottimizzata</button>
+    <button id="genJson" disabled>Scarica data.json aggiornato</button>
+  </div>
+  <div id="genStatus"></div>
+  <p class="muted" style="margin-top:14px">Poi, nella cartella del sito:</p>
+  <pre id="commitHint">git add images/ data.json
+git commit -m "Giorno N"
+git push</pre>
+  <p class="muted">Il sito pubblico su GitHub Pages si aggiorna da solo dopo il push.</p>
+</div>
+
+<script>
+let DATA=null, IMG_BLOB=null, IMG_NAME=null;
+const $=s=>document.querySelector(s);
+const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
+function slug(s){return s.normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/['’]/g,'').replace(/[^A-Za-z0-9]+/g,'');}
+function pad2(n){return String(n).padStart(2,'0');}
+
+function setData(d){
+  DATA=d; const days=d.days.slice().sort((a,b)=>a.day-b.day);
+  $('#dataStatus').innerHTML='<span class="ok">Caricati '+days.length+' giorni.</span> Ultimo: giorno '+days[days.length-1].day+'.';
+  renderPending(); prefillNew();
+}
+function renderPending(){
+  const days=DATA.days.slice().sort((a,b)=>a.day-b.day);
+  const pend=days.find(x=>!x.result);
+  const body=$('#pendingBody'); body.innerHTML='';
+  if(!pend){ body.innerHTML='<p class="muted">Nessuno scontro in sospeso: tutti i giorni hanno un esito. Passa al punto 3.</p>'; body._pendDay=null; return; }
+  body.appendChild(el('p','muted','Inserisci l\'esito del <b>giorno '+pend.day+'</b> (diventa visibile sulla mappa del giorno che aggiungi).'));
+  const box=el('div');
+  pend.contenders.forEach(c=>{
+    const r=el('div','contender');
+    r.innerHTML='<span class="win"><input type="radio" name="pendwin" value="'+c.replace(/"/g,'&quot;')+'"> vince</span><span style="flex:2;font-weight:700">'+c+'</span><span class="muted" style="flex:1">voti</span>';
+    const sc=el('input','sc');sc.type='number';sc.min=0;sc.placeholder='0';sc.dataset.prov=c;sc.style.flex='.7';
+    r.appendChild(sc); box.appendChild(r);
+  });
+  body.appendChild(box); body._pendDay=pend.day;
+}
+function prefillNew(){
+  const days=DATA.days.slice().sort((a,b)=>a.day-b.day);
+  $('#newDay').value=days[days.length-1].day+1;
+  $('#newContenders').innerHTML=''; addContenderRow(); addContenderRow();
+}
+function addContenderRow(){
+  const cw=$('#newContenders'); const r=el('div','contender');
+  const nm=el('input','nm');nm.type='text';nm.placeholder='Provincia';
+  const rg=el('input','rg');rg.type='text';rg.placeholder='Regione';
+  nm.addEventListener('input',()=>{const k=nm.value.trim();if(DATA&&DATA.regionOf[k])rg.value=DATA.regionOf[k];});
+  const del=el('button','del','✕');del.type='button';del.onclick=()=>r.remove();
+  r.append(nm,rg,del); cw.appendChild(r);
+}
+$('#addContender').onclick=addContenderRow;
+
+$('#imgInput').onchange=e=>{
+  const f=e.target.files[0]; if(!f)return;
+  const img=new Image();
+  img.onload=()=>{
+    const W=840,H=Math.round(img.height*(W/img.width));
+    const cv=document.createElement('canvas');cv.width=W;cv.height=H;
+    const ctx=cv.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);ctx.drawImage(img,0,0,W,H);
+    cv.toBlob(b=>{IMG_BLOB=b;const prev=$('#imgPreview');prev.innerHTML='';const pi=new Image();pi.src=URL.createObjectURL(b);prev.appendChild(pi);prev.appendChild(el('p','muted','WebP · '+W+'×'+H+' · '+Math.round(b.size/1024)+' KB'));$('#genImg').disabled=false;$('#genJson').disabled=false;},'image/webp',0.84);
+  };
+  img.src=URL.createObjectURL(f);
+};
+function collectNew(){
+  const day=+$('#newDay').value, type=$('#newType').value;
+  const contenders=[],regions={};
+  [...$('#newContenders').querySelectorAll('.contender')].forEach(r=>{
+    const nm=r.querySelector('.nm').value.trim(), rg=r.querySelector('.rg').value.trim();
+    if(nm){contenders.push(nm);if(rg)regions[nm]=rg;}
+  });
+  return {day,type,contenders,regions};
+}
+function imgName(){const n=collectNew();return pad2(n.day)+'-'+n.contenders.map(slug).join('-')+'.webp';}
+$('#genImg').onclick=()=>{
+  if(!IMG_BLOB){alert('Carica prima un\'immagine.');return;}
+  IMG_NAME=imgName(); const a=document.createElement('a');a.href=URL.createObjectURL(IMG_BLOB);a.download=IMG_NAME;a.click();
+  $('#commitHint').textContent='git add images/'+IMG_NAME+' data.json\ngit commit -m "Giorno '+collectNew().day+'"\ngit push';
+};
+$('#genJson').onclick=()=>{
+  const status=$('#genStatus'); status.innerHTML='';
+  const clone=JSON.parse(JSON.stringify(DATA)); const days=clone.days.sort((a,b)=>a.day-b.day);
+  const pendDay=$('#pendingBody')._pendDay;
+  if(pendDay){
+    const scores={};let any=false;
+    $('#pendingBody').querySelectorAll('input.sc').forEach(i=>{scores[i.dataset.prov]=i.value===''?0:+i.value;if(i.value!=='')any=true;});
+    const win=($('input[name=pendwin]:checked')||{}).value;
+    if(!win||!any){status.innerHTML='<div class="err">Per il giorno '+pendDay+': seleziona il vincitore e inserisci i voti.</div>';return;}
+    const p=days.find(x=>x.day===pendDay); p.result={scores,winner:win,losers:p.contenders.filter(c=>c!==win)};
+  }
+  const n=collectNew();
+  if(!n.day||n.contenders.length<2){status.innerHTML='<div class="err">Nuovo scontro: servono almeno 2 province e un numero di giorno.</div>';return;}
+  if(days.some(x=>x.day===n.day)){status.innerHTML='<div class="err">Il giorno '+n.day+' esiste già.</div>';return;}
+  Object.assign(clone.regionOf,n.regions);
+  const missing=n.contenders.filter(c=>!clone.regionOf[c]);
+  clone.days.push({day:n.day,type:n.type,contenders:n.contenders,image:'images/'+imgName(),result:null});
+  clone.days.sort((a,b)=>a.day-b.day);
+  const blob=new Blob([JSON.stringify(clone,null,1)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='data.json';a.click();
+  let msg='<p class="ok">data.json generato'+(pendDay?(' — esito giorno '+pendDay+' registrato'):'')+', nuovo giorno '+n.day+' aggiunto.</p>';
+  if(missing.length) msg+='<div class="warn">Regione mancante per: '+missing.join(', ')+'. Le statistiche per regione la ignoreranno finché non la aggiungi.</div>';
+  if(IMG_NAME!==imgName()) msg+='<div class="warn">Ricordati di scaricare anche l\'immagine ottimizzata (dev\'essere <code>'+imgName()+'</code>).</div>';
+  status.innerHTML=msg;
+};
+function tryFetch(){fetch('./data.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw 0;return r.json();}).then(setData).catch(()=>{$('#dataStatus').innerHTML='<span class="muted">Non ho letto ./data.json automaticamente (apertura via file://). Caricalo con il selettore qui sopra.</span>';});}
+$('#reload').onclick=tryFetch;
+$('#fileData').onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>setData(JSON.parse(t))).catch(err=>$('#dataStatus').innerHTML='<span class="err">JSON non valido: '+err+'</span>');};
+tryFetch();
+</script>
+</body>
+</html>

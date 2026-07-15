@@ -1,0 +1,590 @@
+{
+ "title": "La Conquista delle Province d'ITAGLIA",
+ "subtitle": "Ogni giorno una provincia ne annette un'altra, finché una sola controllerà tutta l'Italia.",
+ "source": {
+  "subreddit": "r/ITAGLIA",
+  "author": "u/DateAffectionate3719",
+  "url": "https://www.reddit.com/r/ITAGLIA/"
+ },
+ "totalProvinces": 107,
+ "regionOf": {
+  "Bari": "Puglia",
+  "Brindisi": "Puglia",
+  "Foggia": "Puglia",
+  "Modena": "Emilia-Romagna",
+  "Parma": "Emilia-Romagna",
+  "Ferrara": "Emilia-Romagna",
+  "Forlì-Cesena": "Emilia-Romagna",
+  "Mantova": "Lombardia",
+  "Cremona": "Lombardia",
+  "Como": "Lombardia",
+  "Lecco": "Lombardia",
+  "Palermo": "Sicilia",
+  "Agrigento": "Sicilia",
+  "Ragusa": "Sicilia",
+  "Caltanissetta": "Sicilia",
+  "Catania": "Sicilia",
+  "Messina": "Sicilia",
+  "Siracusa": "Sicilia",
+  "Enna": "Sicilia",
+  "Vicenza": "Veneto",
+  "Padova": "Veneto",
+  "Treviso": "Veneto",
+  "Belluno": "Veneto",
+  "Matera": "Basilicata",
+  "Potenza": "Basilicata",
+  "Campobasso": "Molise",
+  "Isernia": "Molise",
+  "Chieti": "Abruzzo",
+  "Teramo": "Abruzzo",
+  "Pescara": "Abruzzo",
+  "L'Aquila": "Abruzzo",
+  "Vercelli": "Piemonte",
+  "Verbano-Cusio-Ossola": "Piemonte",
+  "Cuneo": "Piemonte",
+  "Arezzo": "Toscana",
+  "Prato": "Toscana",
+  "Firenze": "Toscana",
+  "Nuoro": "Sardegna",
+  "Sassari": "Sardegna",
+  "Medio Campidano": "Sardegna",
+  "Cagliari": "Sardegna",
+  "Vibo Valentia": "Calabria",
+  "Catanzaro": "Calabria",
+  "Imperia": "Liguria",
+  "Genova": "Liguria",
+  "Ascoli Piceno": "Marche",
+  "Macerata": "Marche",
+  "Rieti": "Lazio",
+  "Frosinone": "Lazio",
+  "Perugia": "Umbria",
+  "Avellino": "Campania"
+ },
+ "regionColors": {
+  "Piemonte": "#ffe680",
+  "Valle d'Aosta": "#aaccff",
+  "Lombardia": "#ffaaaa",
+  "Trentino-Alto Adige": "#aaccff",
+  "Veneto": "#ffb381",
+  "Friuli-Venezia Giulia": "#ffe680",
+  "Liguria": "#ffb381",
+  "Emilia-Romagna": "#cdde87",
+  "Toscana": "#ffe680",
+  "Umbria": "#ffaaaa",
+  "Marche": "#ffb381",
+  "Lazio": "#aaccff",
+  "Abruzzo": "#cdde87",
+  "Molise": "#ffb381",
+  "Campania": "#ffaaaa",
+  "Puglia": "#ffe680",
+  "Basilicata": "#cdde87",
+  "Calabria": "#ffb381",
+  "Sicilia": "#ffe680",
+  "Sardegna": "#ffaaaa"
+ },
+ "days": [
+  {
+   "day": 1,
+   "type": "duel",
+   "contenders": [
+    "Bari",
+    "Brindisi"
+   ],
+   "image": "images/01-Bari-Brindisi.webp",
+   "result": {
+    "scores": {
+     "Bari": 77,
+     "Brindisi": 70
+    },
+    "winner": "Bari",
+    "losers": [
+     "Brindisi"
+    ]
+   }
+  },
+  {
+   "day": 2,
+   "type": "duel",
+   "contenders": [
+    "Modena",
+    "Mantova"
+   ],
+   "image": "images/02-Modena-Mantova.webp",
+   "result": {
+    "scores": {
+     "Modena": 149,
+     "Mantova": 171
+    },
+    "winner": "Mantova",
+    "losers": [
+     "Modena"
+    ]
+   }
+  },
+  {
+   "day": 3,
+   "type": "duel",
+   "contenders": [
+    "Palermo",
+    "Agrigento"
+   ],
+   "image": "images/03-Palermo-Agrigento.webp",
+   "result": {
+    "scores": {
+     "Palermo": 77,
+     "Agrigento": 119
+    },
+    "winner": "Agrigento",
+    "losers": [
+     "Palermo"
+    ]
+   }
+  },
+  {
+   "day": 4,
+   "type": "duel",
+   "contenders": [
+    "Vicenza",
+    "Padova"
+   ],
+   "image": "images/04-Vicenza-Padova.webp",
+   "result": {
+    "scores": {
+     "Vicenza": 144,
+     "Padova": 126
+    },
+    "winner": "Vicenza",
+    "losers": [
+     "Padova"
+    ]
+   }
+  },
+  {
+   "day": 5,
+   "type": "duel",
+   "contenders": [
+    "Cremona",
+    "Parma"
+   ],
+   "image": "images/05-Cremona-Parma.webp",
+   "result": {
+    "scores": {
+     "Cremona": 124,
+     "Parma": 192
+    },
+    "winner": "Parma",
+    "losers": [
+     "Cremona"
+    ]
+   }
+  },
+  {
+   "day": 6,
+   "type": "duel",
+   "contenders": [
+    "Matera",
+    "Potenza"
+   ],
+   "image": "images/06-Matera-Potenza.webp",
+   "result": {
+    "scores": {
+     "Matera": 199,
+     "Potenza": 10
+    },
+    "winner": "Matera",
+    "losers": [
+     "Potenza"
+    ]
+   }
+  },
+  {
+   "day": 7,
+   "type": "duel",
+   "contenders": [
+    "Ragusa",
+    "Caltanissetta"
+   ],
+   "image": "images/07-Ragusa-Caltanissetta.webp",
+   "result": {
+    "scores": {
+     "Ragusa": 96,
+     "Caltanissetta": 15
+    },
+    "winner": "Ragusa",
+    "losers": [
+     "Caltanissetta"
+    ]
+   }
+  },
+  {
+   "day": 8,
+   "type": "duel",
+   "contenders": [
+    "Campobasso",
+    "Chieti"
+   ],
+   "image": "images/08-Campobasso-Chieti.webp",
+   "result": {
+    "scores": {
+     "Campobasso": 89,
+     "Chieti": 10
+    },
+    "winner": "Campobasso",
+    "losers": [
+     "Chieti"
+    ]
+   }
+  },
+  {
+   "day": 9,
+   "type": "duel",
+   "contenders": [
+    "Vercelli",
+    "Verbano-Cusio-Ossola"
+   ],
+   "image": "images/09-Vercelli-VerbanoCusioOssola.webp",
+   "result": {
+    "scores": {
+     "Vercelli": 28,
+     "Verbano-Cusio-Ossola": 50
+    },
+    "winner": "Verbano-Cusio-Ossola",
+    "losers": [
+     "Vercelli"
+    ]
+   }
+  },
+  {
+   "day": 10,
+   "type": "duel",
+   "contenders": [
+    "Forlì-Cesena",
+    "Arezzo"
+   ],
+   "image": "images/10-ForliCesena-Arezzo.webp",
+   "result": {
+    "scores": {
+     "Forlì-Cesena": 36,
+     "Arezzo": 57
+    },
+    "winner": "Arezzo",
+    "losers": [
+     "Forlì-Cesena"
+    ]
+   }
+  },
+  {
+   "day": 11,
+   "type": "bonus",
+   "contenders": [
+    "Catania",
+    "Messina",
+    "Siracusa",
+    "Ragusa",
+    "Enna"
+   ],
+   "image": "images/11-BONUS-Catania-Messina-Siracusa-Ragusa-Enna.webp",
+   "result": {
+    "scores": {
+     "Siracusa": 27,
+     "Enna": 18,
+     "Catania": 10,
+     "Messina": 1,
+     "Ragusa": 0
+    },
+    "winner": "Siracusa",
+    "losers": [
+     "Catania",
+     "Messina",
+     "Ragusa",
+     "Enna"
+    ]
+   }
+  },
+  {
+   "day": 12,
+   "type": "duel",
+   "contenders": [
+    "Nuoro",
+    "Sassari"
+   ],
+   "image": "images/12-Nuoro-Sassari.webp",
+   "result": {
+    "scores": {
+     "Nuoro": 29,
+     "Sassari": 41
+    },
+    "winner": "Sassari",
+    "losers": [
+     "Nuoro"
+    ]
+   }
+  },
+  {
+   "day": 13,
+   "type": "duel",
+   "contenders": [
+    "Vibo Valentia",
+    "Catanzaro"
+   ],
+   "image": "images/13-ViboValentia-Catanzaro.webp",
+   "result": {
+    "scores": {
+     "Vibo Valentia": 48,
+     "Catanzaro": 22
+    },
+    "winner": "Vibo Valentia",
+    "losers": [
+     "Catanzaro"
+    ]
+   }
+  },
+  {
+   "day": 14,
+   "type": "duel",
+   "contenders": [
+    "Treviso",
+    "Vicenza"
+   ],
+   "image": "images/14-Treviso-Vicenza.webp",
+   "result": {
+    "scores": {
+     "Treviso": 41,
+     "Vicenza": 26
+    },
+    "winner": "Treviso",
+    "losers": [
+     "Vicenza"
+    ]
+   }
+  },
+  {
+   "day": 15,
+   "type": "duel",
+   "contenders": [
+    "Como",
+    "Lecco"
+   ],
+   "image": "images/15-Como-Lecco.webp",
+   "result": {
+    "scores": {
+     "Como": 30,
+     "Lecco": 36
+    },
+    "winner": "Lecco",
+    "losers": [
+     "Como"
+    ]
+   }
+  },
+  {
+   "day": 16,
+   "type": "duel",
+   "contenders": [
+    "Prato",
+    "Firenze"
+   ],
+   "image": "images/16-Prato-Firenze.webp",
+   "result": {
+    "scores": {
+     "Prato": 11,
+     "Firenze": 53
+    },
+    "winner": "Firenze",
+    "losers": [
+     "Prato"
+    ]
+   }
+  },
+  {
+   "day": 17,
+   "type": "duel",
+   "contenders": [
+    "Imperia",
+    "Cuneo"
+   ],
+   "image": "images/17-Imperia-Cuneo.webp",
+   "result": {
+    "scores": {
+     "Imperia": 44,
+     "Cuneo": 35
+    },
+    "winner": "Imperia",
+    "losers": [
+     "Cuneo"
+    ]
+   }
+  },
+  {
+   "day": 18,
+   "type": "duel",
+   "contenders": [
+    "Genova",
+    "Parma"
+   ],
+   "image": "images/18-Genova-Parma.webp",
+   "result": {
+    "scores": {
+     "Genova": 44,
+     "Parma": 49
+    },
+    "winner": "Parma",
+    "losers": [
+     "Genova"
+    ]
+   }
+  },
+  {
+   "day": 19,
+   "type": "duel",
+   "contenders": [
+    "Medio Campidano",
+    "Cagliari"
+   ],
+   "image": "images/19-MedioCampidano-Cagliari.webp",
+   "result": {
+    "scores": {
+     "Medio Campidano": 14,
+     "Cagliari": 54
+    },
+    "winner": "Cagliari",
+    "losers": [
+     "Medio Campidano"
+    ]
+   }
+  },
+  {
+   "day": 20,
+   "type": "bonus",
+   "contenders": [
+    "Teramo",
+    "Ascoli Piceno",
+    "Pescara",
+    "L'Aquila",
+    "Rieti"
+   ],
+   "image": "images/20-BONUS-Teramo-AscoliPiceno-Pescara-LAquila-Rieti.webp",
+   "result": {
+    "scores": {
+     "Rieti": 24,
+     "L'Aquila": 22,
+     "Pescara": 11,
+     "Ascoli Piceno": 5,
+     "Teramo": 3
+    },
+    "winner": "Rieti",
+    "losers": [
+     "Teramo",
+     "Ascoli Piceno",
+     "Pescara",
+     "L'Aquila"
+    ]
+   }
+  },
+  {
+   "day": 21,
+   "type": "duel",
+   "contenders": [
+    "Macerata",
+    "Perugia"
+   ],
+   "image": "images/21-Macerata-Perugia.webp",
+   "result": {
+    "scores": {
+     "Macerata": 19,
+     "Perugia": 58
+    },
+    "winner": "Perugia",
+    "losers": [
+     "Macerata"
+    ]
+   }
+  },
+  {
+   "day": 22,
+   "type": "duel",
+   "contenders": [
+    "Ferrara",
+    "Mantova"
+   ],
+   "image": "images/22-Ferrara-Mantova.webp",
+   "result": {
+    "scores": {
+     "Ferrara": 50,
+     "Mantova": 26
+    },
+    "winner": "Ferrara",
+    "losers": [
+     "Mantova"
+    ]
+   }
+  },
+  {
+   "day": 23,
+   "type": "duel",
+   "contenders": [
+    "Foggia",
+    "Avellino"
+   ],
+   "image": "images/23-Foggia-Avellino.webp",
+   "result": {
+    "scores": {
+     "Foggia": 13,
+     "Avellino": 56
+    },
+    "winner": "Avellino",
+    "losers": [
+     "Foggia"
+    ]
+   }
+  },
+  {
+   "day": 24,
+   "type": "duel",
+   "contenders": [
+    "Campobasso",
+    "Avellino"
+   ],
+   "image": "images/24-Campobasso-Avellino.webp",
+   "result": {
+    "scores": {
+     "Campobasso": 69,
+     "Avellino": 11
+    },
+    "winner": "Campobasso",
+    "losers": [
+     "Avellino"
+    ]
+   }
+  },
+  {
+   "day": 25,
+   "type": "duel",
+   "contenders": [
+    "Frosinone",
+    "Isernia"
+   ],
+   "image": "images/25-Frosinone-Isernia.webp",
+   "result": {
+    "scores": {
+     "Frosinone": 30,
+     "Isernia": 35
+    },
+    "winner": "Isernia",
+    "losers": [
+     "Frosinone"
+    ]
+   }
+  },
+  {
+   "day": 26,
+   "type": "duel",
+   "contenders": [
+    "Treviso",
+    "Belluno"
+   ],
+   "image": "images/26-Treviso-Belluno.webp",
+   "result": null
+  }
+ ]
+}

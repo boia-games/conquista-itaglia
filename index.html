@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>La Conquista delle Province d'ITAGLIA</title>
+<meta name="description" content="Visualizzatore giorno per giorno della conquista delle province italiane su r/ITAGLIA.">
+<style>
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:#fff;color:#161616;font-family:Georgia,'Times New Roman',Times,serif;font-size:17px;line-height:1.55}
+  .page{max-width:760px;margin:0 auto;padding:32px 22px 90px}
+  h1{font-size:27px;font-weight:700;margin:0 0 4px}
+  h2{font-size:19px;font-weight:700;margin:34px 0 10px}
+  p{margin:0 0 10px}
+  .sub{color:#444;font-style:italic;margin:0 0 6px}
+  .src{color:#666;font-size:14px;margin:0}
+  a{color:#161616}
+  hr{border:0;border-top:1px solid #d8d8d8;margin:22px 0}
+  .rule-strong{border-top:2px solid #161616;margin:18px 0}
+  .muted{color:#666}
+  .small{font-size:14px}
+
+  figure{margin:14px 0 10px;text-align:center}
+  .maps{position:relative;width:min(520px,86vw);aspect-ratio:840/1050;margin:0 auto;border:1px solid #cfcfcf;background:#fff}
+  .maps img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:none}
+  .maps img.on{display:block}
+  figcaption{margin-top:8px;font-size:15px;color:#333}
+  figcaption b{font-weight:700}
+
+  .controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;margin:8px 0 4px}
+  button{font-family:inherit;font-size:15px;background:#fff;color:#161616;border:1px solid #161616;padding:5px 12px;cursor:pointer;border-radius:0}
+  button:hover{background:#f0f0f0}
+  button.play{min-width:82px}
+  input[type=range]{width:200px;max-width:46vw;accent-color:#161616}
+  select{font-family:inherit;font-size:15px;border:1px solid #161616;background:#fff;padding:4px 6px;border-radius:0}
+  label.ctl{font-family:inherit;font-size:15px;display:inline-flex;align-items:center;gap:6px;color:#333;cursor:pointer}
+  .dayreadout{font-size:14px;color:#555;text-align:center;margin:2px 0 0}
+
+  .win{font-weight:700;text-decoration:underline}
+  .tag{font-style:italic;color:#555}
+  .match .lead{font-size:18px}
+  .match .prev{color:#333}
+
+  table{border-collapse:collapse;width:100%;font-size:15px}
+  th,td{text-align:left;padding:6px 8px;border-bottom:1px solid #e2e2e2;vertical-align:top}
+  th{border-bottom:1px solid #161616;font-weight:700}
+  td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  tr.clk{cursor:pointer}
+  tr.clk:hover td{background:#f4f4f4}
+  tr.cur td{background:#efefef}
+  tr.cur td:first-child{box-shadow:inset 3px 0 0 #161616}
+  .members{color:#555}
+  .bar{display:inline-block;height:10px;background:#161616;vertical-align:middle}
+  .bartrack{display:inline-block;width:110px;height:10px;background:#efefef;border:1px solid #d0d0d0;vertical-align:middle;margin-right:6px}
+  .bartrack .bar{display:block;height:10px}
+  .sw{display:inline-block;width:11px;height:11px;border:1px solid #8a8a8a;margin-right:6px;vertical-align:-1px}
+
+  .filters{font-size:15px;margin:0 0 10px}
+  .filters a{cursor:pointer;color:#161616;text-decoration:none;border-bottom:1px solid transparent;padding-bottom:1px}
+  .filters a:hover{border-bottom:1px solid #999}
+  .filters a.active{font-weight:700;border-bottom:1px solid #161616}
+  .filters .sep{color:#bbb;margin:0 7px}
+
+  .trend svg{display:block;margin:6px 0}
+  .toggle-all{font-size:14px;display:inline-block;margin-top:8px}
+  .foot{margin-top:40px;color:#777;font-size:13.5px;line-height:1.7;border-top:1px solid #d8d8d8;padding-top:14px}
+  .err{border:1px solid #161616;padding:14px 16px;font-size:15px;background:#fafafa}
+  code{font-family:'Courier New',monospace;font-size:14px;background:#f2f2f2;padding:1px 4px}
+</style>
+</head>
+<body>
+<div class="page">
+  <h1 id="title">La Conquista delle Province d'ITAGLIA</h1>
+  <p class="sub" id="subtitle"></p>
+  <p class="src" id="src"></p>
+  <div id="app"></div>
+  <div class="foot" id="foot"></div>
+</div>
+
+<script>
+let DATA=null, DAYS=[], CUR=1, PLAY=false, TIMER=null, SPEED=1400, SPOIL=true, LOGFILTER='all', EMPALL=false;
+let UI={};
+const $=(s,r=document)=>r.querySelector(s);
+const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+const regionOf=p=>DATA.regionOf[p]||'—';
+const regColor=r=>(DATA.regionColors&&DATA.regionColors[r])||'#e6e6e6';
+const provColor=p=>regColor(regionOf(p));
+const sw=c=>'<span class="sw" style="background:'+c+'"></span>';
+
+function marginInfo(scores,winner,losers){
+  const w=scores[winner]; const best=Math.max(...losers.map(l=>scores[l]??0));
+  if(best===0 && w>0) return {t:'cappotto'};
+  const ratio=best>0? w/best : 99, gap=w-best;
+  if(ratio>=3) return {t:'schiacciante'};
+  if(ratio>=1.6) return {t:'netto'};
+  if(gap<=6 || ratio<1.15) return {t:'all’ultimo voto'};
+  return {t:'combattuto'};
+}
+const isClose=t=>t==='combattuto'||t==='all’ultimo voto';
+const isCrush=t=>t==='schiacciante'||t==='cappotto';
+
+function stateBefore(uptoDay){
+  const parent={}, size={};
+  const find=x=>{ if(parent[x]===undefined){parent[x]=x;size[x]=1;} while(parent[x]!==x){parent[x]=parent[parent[x]];x=parent[x];} return x; };
+  const union=(w,l)=>{ const rw=find(w), rl=find(l); if(rw===rl)return; parent[rl]=rw; size[rw]+=size[rl]; };
+  let elim=0;
+  DAYS.forEach(d=>{ if(d.day>=uptoDay||!d.result)return; d.contenders.forEach(c=>find(c)); d.result.losers.forEach(l=>{union(d.result.winner,l);elim++;}); });
+  DAYS.forEach(d=>{ if(d.day<=uptoDay) d.contenders.forEach(c=>find(c)); });
+  const blocks={}; for(const p in parent){ const r=find(p); (blocks[r]=blocks[r]||[]).push(p); }
+  return {parent,size,find,blocks,elim};
+}
+
+/* build persistent shell once */
+function buildShell(){
+  const app=$('#app'); app.innerHTML='';
+  const fig=el('figure');
+  const maps=el('div','maps');
+  DAYS.forEach(d=>{ const img=el('img'); img.src=d.image; img.alt='Mappa giorno '+d.day; img.dataset.day=d.day; img.decoding='async'; maps.appendChild(img); });
+  const cap=el('figcaption'); fig.append(maps,cap); app.appendChild(fig);
+
+  const ctr=el('div','controls');
+  const prev=el('button',null,'◀'); prev.title='Giorno precedente'; prev.onclick=()=>{stop();go(CUR-1)};
+  const play=el('button','play','▶ play'); play.onclick=togglePlay;
+  const next=el('button',null,'▶'); next.title='Giorno successivo'; next.onclick=()=>{stop();go(CUR+1)};
+  const slider=el('input'); slider.type='range'; slider.min=1; slider.max=DAYS.length; slider.value=CUR; slider.oninput=e=>{stop();go(+e.target.value)};
+  const spd=el('select'); [['lento',2400],['normale',1400],['veloce',800],['turbo',400]].forEach(([t,v])=>{const o=el('option',null,t);o.value=v;if(v===SPEED)o.selected=true;spd.appendChild(o);}); spd.onchange=e=>{SPEED=+e.target.value; if(PLAY){stop();start();}};
+  const sp=el('label','ctl'); const cbx=el('input');cbx.type='checkbox';cbx.checked=SPOIL;cbx.onchange=e=>{SPOIL=e.target.checked;update();}; sp.append(cbx,document.createTextNode('mostra esiti'));
+  ctr.append(prev,play,next,slider,spd,sp);
+  app.appendChild(ctr);
+  app.appendChild(el('p','dayreadout','usa ◀ ▶ o la barra · spazio per play/pausa'));
+
+  const dyn=el('div'); dyn.id='dyn'; app.appendChild(dyn);
+  UI={maps,cap,play,slider,dyn};
+}
+
+/* update everything that depends on CUR (map stays put) */
+function update(){
+  const cur=DAYS.find(d=>d.day===CUR), st=stateBefore(CUR), remain=DATA.totalProvinces-st.elim;
+  UI.maps.querySelectorAll('img').forEach(im=>im.classList.toggle('on',+im.dataset.day===CUR));
+  UI.cap.innerHTML='Giorno <b>'+CUR+'</b> di '+DAYS.length+' — <b>'+remain+'</b> province rimaste su '+DATA.totalProvinces;
+  UI.play.innerHTML=PLAY?'❚❚ pausa':'▶ play';
+  if(document.activeElement!==UI.slider) UI.slider.value=CUR;
+
+  const dyn=UI.dyn; dyn.innerHTML='';
+
+  /* MATCH */
+  dyn.appendChild(el('div','rule-strong'));
+  const m=el('div','match'); m.appendChild(el('h2',null,'Scontro del giorno '+CUR));
+  const typ=cur.type==='bonus';
+  m.appendChild(el('p','lead', typ
+    ? '<span class="tag">sfida bonus</span> — '+cur.contenders.map(esc).join(' · ')+' <span class="muted">(tutte contro tutte)</span>'
+    : '<b>'+esc(cur.contenders[0])+'</b> contro <b>'+esc(cur.contenders[1])+'</b>'));
+  const prevDay=DAYS.find(d=>d.day===CUR-1);
+  if(prevDay && prevDay.result){
+    const r=prevDay.result, mi=marginInfo(r.scores,r.winner,r.losers); let s;
+    if(SPOIL){
+      if(prevDay.type==='bonus'){
+        const rk=Object.entries(r.scores).sort((a,b)=>b[1]-a[1]).map(([p,v])=>(p===r.winner?'<span class="win">'+esc(p)+'</span>':esc(p))+' '+v).join(' · ');
+        s='Esito precedente (giorno '+prevDay.day+'): '+rk+' — <span class="tag">'+mi.t+'</span>. '+esc(r.winner)+' annette '+r.losers.length+' province.';
+      }else{
+        const a=prevDay.contenders[0],b=prevDay.contenders[1];
+        s='Esito precedente (giorno '+prevDay.day+'): '+(r.winner===a?'<span class="win">'+esc(a)+'</span>':esc(a))+' '+r.scores[a]+' – '+r.scores[b]+' '+(r.winner===b?'<span class="win">'+esc(b)+'</span>':esc(b))+' — <span class="tag">'+mi.t+'</span>. '+esc(r.winner)+' annette '+esc(r.losers[0])+'.';
+      }
+    }else s='Esito precedente nascosto (modalità suspense).';
+    m.appendChild(el('p','prev small',s));
+  }else if(CUR===1){ m.appendChild(el('p','prev small','Mappa iniziale: 107 province indipendenti.')); }
+  if(!cur.result) m.appendChild(el('p','small muted','Votazione in corso — nessun esito ancora.'));
+  dyn.appendChild(m);
+
+  /* PROVINCE RIMASTE */
+  dyn.appendChild(el('hr')); dyn.appendChild(el('h2',null,'Province rimaste'));
+  dyn.appendChild(el('p','small','Da <b>'+DATA.totalProvinces+'</b> province iniziali a <b>'+remain+'</b> ('+(DATA.totalProvinces-remain)+' annesse in '+(CUR-1)+' scontri risolti).'));
+  const tr=el('div','trend'); tr.innerHTML=trendSVG(); dyn.appendChild(tr);
+
+  /* IMPERI */
+  dyn.appendChild(el('hr')); dyn.appendChild(el('h2',null,'Imperi'));
+  let blist=Object.values(st.blocks).map(mem=>({root:st.find(mem[0]),members:mem.slice().sort((a,b)=>a.localeCompare(b))}));
+  blist.sort((a,b)=>b.members.length-a.members.length||a.root.localeCompare(b.root));
+  const multi=blist.filter(b=>b.members.length>1);
+  dyn.appendChild(el('p','small muted','Una provincia "capitale" più i territori che ha annesso. '+multi.length+' imperi attivi'+(multi.length?', il più grande '+multi[0].members.length+' province':'')+'.'));
+  const shown=EMPALL?blist:multi;
+  if(shown.length){
+    const t=el('table'); t.innerHTML='<thead><tr><th class="n">#</th><th>Capitale</th><th>Regione</th><th class="n">Prov.</th><th>Territori annessi</th></tr></thead>';
+    const tb=el('tbody');
+    shown.forEach((b,i)=>{ const others=b.members.filter(x=>x!==b.root); const row=el('tr');
+      row.innerHTML='<td class="n">'+(i+1)+'</td><td>'+sw(provColor(b.root))+'<b>'+esc(b.root)+'</b></td><td class="muted">'+esc(regionOf(b.root))+'</td><td class="n">'+b.members.length+'</td><td class="members small">'+(others.length?others.map(esc).join(', '):'<span class="muted">—</span>')+'</td>';
+      tb.appendChild(row); });
+    t.appendChild(tb); dyn.appendChild(t);
+  }else dyn.appendChild(el('p','small muted','Nessuna annessione ancora.'));
+  const tgl=el('a','toggle-all',EMPALL?'▲ mostra solo gli imperi':'▼ mostra tutte le '+blist.length+' province sopravvissute');
+  tgl.href='javascript:void 0'; tgl.onclick=()=>{EMPALL=!EMPALL;update();}; dyn.appendChild(tgl);
+
+  /* REGIONE */
+  dyn.appendChild(el('hr')); dyn.appendChild(el('h2',null,'Conquiste per regione')); dyn.appendChild(regionTable(st));
+
+  /* LOG */
+  dyn.appendChild(el('hr')); dyn.appendChild(el('h2',null,'Registro battaglie'));
+  const filt=el('p','filters');
+  [['all','Tutte'],['duel','Duelli'],['bonus','Bonus'],['crush','Schiaccianti'],['close','Combattute']].forEach(([k,t],i)=>{ if(i)filt.appendChild(el('span','sep','·')); const a=el('a',(LOGFILTER===k?'active':''),t); a.href='javascript:void 0'; a.onclick=()=>{LOGFILTER=k;update();}; filt.appendChild(a); });
+  dyn.appendChild(filt); dyn.appendChild(buildLog());
+}
+
+function trendSVG(){
+  const W=520,H=90,padL=26,padR=8,padT=10,padB=18;
+  const pts=DAYS.map(d=>({day:d.day,rem:DATA.totalProvinces-stateBefore(d.day).elim}));
+  const maxR=DATA.totalProvinces, minR=Math.min(...pts.map(p=>p.rem)), lo=Math.floor((minR-2)/5)*5;
+  const x=i=>padL+i*(W-padL-padR)/(DAYS.length-1);
+  const y=v=>{const t=(v-lo)/(maxR-lo);return H-padB-t*(H-padT-padB);};
+  let path=''; pts.forEach((p,i)=>{path+=(i?'L':'M')+x(i).toFixed(1)+' '+y(p.rem).toFixed(1)+' ';});
+  const ci=CUR-1;
+  return '<svg width="100%" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet" font-family="Georgia,serif">'+
+    '<line x1="'+padL+'" y1="'+(H-padB)+'" x2="'+(W-padR)+'" y2="'+(H-padB)+'" stroke="#ccc"/>'+
+    '<line x1="'+padL+'" y1="'+padT+'" x2="'+padL+'" y2="'+(H-padB)+'" stroke="#ccc"/>'+
+    '<text x="2" y="'+(y(maxR)+4)+'" font-size="10" fill="#888">'+maxR+'</text>'+
+    '<text x="2" y="'+(y(lo)+4)+'" font-size="10" fill="#888">'+lo+'</text>'+
+    '<path d="'+path+'" fill="none" stroke="#161616" stroke-width="1.4"/>'+
+    '<line x1="'+x(ci)+'" y1="'+padT+'" x2="'+x(ci)+'" y2="'+(H-padB)+'" stroke="#888" stroke-dasharray="2 2"/>'+
+    '<circle cx="'+x(ci)+'" cy="'+y(pts[ci].rem)+'" r="3" fill="#161616"/>'+
+    '<text x="'+x(ci)+'" y="'+(y(pts[ci].rem)-6)+'" font-size="10" font-weight="bold" fill="#161616" text-anchor="middle">'+pts[ci].rem+'</text>'+
+    '<text x="'+padL+'" y="'+(H-4)+'" font-size="10" fill="#888">g.1</text>'+
+    '<text x="'+(W-padR)+'" y="'+(H-4)+'" font-size="10" fill="#888" text-anchor="end">g.'+DAYS.length+'</text></svg>';
+}
+
+function regionTable(st){
+  const inHouse={},taken={},lost={};
+  Object.values(st.blocks).forEach(mem=>{ const root=st.find(mem[0]),rReg=regionOf(root);
+    mem.forEach(m=>{ const mReg=regionOf(m); if(mReg===rReg)inHouse[rReg]=(inHouse[rReg]||0)+1; else {taken[rReg]=(taken[rReg]||0)+1;lost[mReg]=(lost[mReg]||0)+1;} }); });
+  const regs=new Set([...Object.keys(inHouse),...Object.keys(taken),...Object.keys(lost)]);
+  let rows=[...regs].map(r=>({r,ctrl:(inHouse[r]||0)+(taken[r]||0),cross:(taken[r]||0),lost:(lost[r]||0)}));
+  rows.sort((a,b)=>b.ctrl-a.ctrl||b.cross-a.cross||a.r.localeCompare(b.r));
+  if(!rows.length) return el('p','small muted','Nessuna conquista ancora.');
+  const max=Math.max(1,...rows.map(r=>r.ctrl)); const wrap=el('div');
+  wrap.appendChild(el('p','small muted','Territori controllati oggi da una capitale di quella regione; “fuori regione” = strappati ad altre regioni.'));
+  const t=el('table'); t.innerHTML='<thead><tr><th>Regione</th><th>Controllo</th><th class="n">Tot.</th><th class="n">Fuori reg.</th><th class="n">Perse</th></tr></thead>';
+  const tb=el('tbody');
+  rows.forEach(o=>{ const w=Math.round(o.ctrl/max*110); const row=el('tr');
+    row.innerHTML='<td>'+sw(regColor(o.r))+esc(o.r)+'</td><td><span class="bartrack"><span class="bar" style="width:'+w+'px;background:'+regColor(o.r)+'"></span></span></td><td class="n">'+o.ctrl+'</td><td class="n">'+(o.cross||'—')+'</td><td class="n">'+(o.lost||'—')+'</td>';
+    tb.appendChild(row); });
+  t.appendChild(tb); wrap.appendChild(t); return wrap;
+}
+
+function buildLog(){
+  const t=el('table'); t.innerHTML='<thead><tr><th class="n">G.</th><th>Scontro</th><th>Esito</th><th>Margine</th></tr></thead>';
+  const tb=el('tbody');
+  DAYS.filter(d=>d.result).forEach(d=>{
+    const r=d.result, mi=marginInfo(r.scores,r.winner,r.losers);
+    if(LOGFILTER==='duel'&&d.type!=='duel')return; if(LOGFILTER==='bonus'&&d.type!=='bonus')return;
+    if(LOGFILTER==='crush'&&!isCrush(mi.t))return; if(LOGFILTER==='close'&&!isClose(mi.t))return;
+    let scontro,esito;
+    if(d.type==='bonus'){ scontro='<span class="tag">bonus</span> '+esc(r.winner)+' + '+d.contenders.filter(c=>c!==r.winner).length+' sfid.'; esito='<span class="win">'+esc(r.winner)+'</span> annette '+r.losers.length+' prov.'; }
+    else{ const a=d.contenders[0],b=d.contenders[1]; scontro=esc(a)+' – '+esc(b); esito=(r.winner===a?'<span class="win">'+esc(a)+'</span>':'<span class="win">'+esc(b)+'</span>')+' '+r.scores[a]+'–'+r.scores[b]; }
+    const row=el('tr','clk'+(d.day===CUR?' cur':'')); row.innerHTML='<td class="n">'+d.day+'</td><td>'+scontro+'</td><td>'+esito+'</td><td class="tag">'+mi.t+'</td>';
+    row.onclick=()=>{stop();go(Math.min(DAYS.length,d.day+1))}; tb.appendChild(row);
+  });
+  const pend=DAYS.find(d=>!d.result);
+  if(pend && (LOGFILTER==='all'||(LOGFILTER==='duel'&&pend.type==='duel')||(LOGFILTER==='bonus'&&pend.type==='bonus'))){
+    const row=el('tr','clk'+(pend.day===CUR?' cur':'')); row.innerHTML='<td class="n">'+pend.day+'</td><td>'+esc(pend.contenders.join(' – '))+'</td><td class="muted">in corso</td><td class="tag">—</td>';
+    row.onclick=()=>{stop();go(pend.day)}; tb.appendChild(row);
+  }
+  t.appendChild(tb); return t;
+}
+
+function go(day){ day=Math.max(1,Math.min(DAYS.length,day)); CUR=day; update(); }
+function start(){ PLAY=true; TIMER=setInterval(()=>{ if(CUR>=DAYS.length){stop();update();return;} go(CUR+1); },SPEED); update(); }
+function stop(){ PLAY=false; if(TIMER){clearInterval(TIMER);TIMER=null;} update && UI.play && (UI.play.innerHTML='▶ play'); }
+function togglePlay(){ if(PLAY){stop();} else { if(CUR>=DAYS.length)CUR=1; start(); } }
+document.addEventListener('keydown',e=>{
+  if(e.target && /input|select|textarea/i.test(e.target.tagName))return;
+  if(e.key==='ArrowRight'){stop();go(CUR+1);}
+  else if(e.key==='ArrowLeft'){stop();go(CUR-1);}
+  else if(e.key===' '){e.preventDefault();togglePlay();}
+});
+
+function boot(data){
+  DATA=data; DAYS=data.days.slice().sort((a,b)=>a.day-b.day); CUR=DAYS.length;
+  $('#title').textContent=data.title; $('#subtitle').textContent=data.subtitle||'';
+  const s=data.source||{};
+  $('#src').innerHTML=(s.subreddit?'Fonte: <a href="'+(s.url||'#')+'">'+esc(s.subreddit)+'</a>':'')+(s.author?' · '+esc(s.author):'');
+  const rem=DATA.totalProvinces-stateBefore(DAYS.length).elim;
+  $('#foot').innerHTML='Mappe e dati dalla serie di '+esc(s.author||'')+' su '+esc(s.subreddit||'Reddit')+'. Visualizzatore non ufficiale (fan-project); le mappe sono dell’autore originale.<br>Aggiornato al giorno '+DAYS.length+' — '+rem+' province ancora in gioco.';
+  buildShell(); update();
+}
+fetch('./data.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error(r.status);return r.json();}).then(boot)
+ .catch(err=>{ $('#app').innerHTML='<div class="err"><b>Impossibile caricare data.json.</b><br>Se apri il file con doppio-clic (file://) il browser blocca la lettura del JSON. Avvia un server nella cartella:<br><br><code>python3 -m http.server 8080</code><br><br>e apri <code>http://localhost:8080</code>. Su GitHub Pages funziona senza fare nulla.<br><span class="muted small">('+esc(err)+')</span></div>'; });
+</script>
+</body>
+</html>
