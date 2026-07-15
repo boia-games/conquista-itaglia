@@ -1,4 +1,4 @@
-# La Conquista delle Province d'ITAGLIA
+# 🇮🇹 La Conquista delle Province d'ITAGLIA
 
 Un piccolo sito che fa vedere, giorno per giorno, come cambia la mappa nel gioco
 della **conquista delle province italiane** nato su [r/ITAGLIA](https://www.reddit.com/r/ITAGLIA/).
