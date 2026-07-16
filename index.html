@@ -97,7 +97,7 @@
 
 <script>
 let DATA=null, DAYS=[], CUR=1, PLAY=false, TIMER=null, SPEED=900, SPOIL=true, LOGFILTER='all', EMPALL=false, LOOP=false;
-let UI={}, PANEL_OPEN={rimaste:true,imperi:true,regione:true,registro:true};
+let UI={}, PANEL_OPEN={rimaste:true,imperi:true,regione:true,classifica:true,registro:true};
 const $=(s,r=document)=>r.querySelector(s);
 const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
@@ -204,7 +204,24 @@ function update(){
 
   R.appendChild(panel('imperi','Imperi',imperiBody(st)));
   R.appendChild(panel('regione','Conquiste per regione',regionBody(st)));
+  R.appendChild(panel('classifica','Classifica (province eliminate)',classificaBody()));
   R.appendChild(panel('registro','Registro battaglie',registroBody()));
+}
+
+function classificaBody(){
+  const wrap=el('div');
+  const elim=[];
+  DAYS.forEach(d=>{ if(d.day>=CUR||!d.result)return; d.result.losers.forEach(l=>elim.push({prov:l,day:d.day,score:d.result.scores[l],by:d.result.winner})); });
+  const remain=DATA.totalProvinces-elim.length;
+  elim.sort((a,b)=>b.day-a.day||b.score-a.score||a.prov.localeCompare(b.prov));
+  wrap.appendChild(el('p','small muted','La stessa lista che trovi in fondo ai post: le province già cadute, dalla più recente alla prima eliminata. Restano '+remain+' province su '+DATA.totalProvinces+'.'));
+  if(!elim.length){ wrap.appendChild(el('p','small muted','Ancora nessuna provincia eliminata.')); return wrap; }
+  const t=el('table'); t.innerHTML='<thead><tr><th class="n">#</th><th>Provincia</th><th>Eliminato da</th></tr></thead>';
+  const tb=el('tbody');
+  elim.forEach((e,i)=>{ const pos=remain+1+i; const row=el('tr','clk'+(e.day===CUR-1?' cur':''));
+    row.innerHTML='<td class="n">'+pos+'</td><td>'+sw(provColor(e.prov))+esc(e.prov)+' <span class="muted small">('+esc(regionOf(e.prov))+')</span></td><td>'+sw(provColor(e.by))+esc(e.by)+' <span class="muted small">g.'+e.day+'</span></td>';
+    row.onclick=()=>{stop();go(Math.min(DAYS.length,e.day+1));}; tb.appendChild(row); });
+  t.appendChild(tb); wrap.appendChild(t); return wrap;
 }
 
 function imperiBody(st){
