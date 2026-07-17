@@ -61,7 +61,8 @@
   "Frosinone": "Lazio",
   "Perugia": "Umbria",
   "Terni": "Umbria",
-  "Avellino": "Campania"
+  "Avellino": "Campania",
+  "Trento": "Trentino-Alto Adige"
  },
  "regionColors": {
   "Piemonte": "#ffe680",
@@ -625,6 +626,25 @@
     "Perugia"
    ],
    "image": "images/28-Terni-Perugia.webp",
+   "result": {
+    "scores": {
+     "Terni": 18,
+     "Perugia": 51
+    },
+    "winner": "Perugia",
+    "losers": [
+     "Terni"
+    ]
+   }
+  },
+  {
+   "day": 29,
+   "type": "duel",
+   "contenders": [
+    "Treviso",
+    "Trento"
+   ],
+   "image": "images/29-Treviso-Trento.webp",
    "result": null
   }
  ]
