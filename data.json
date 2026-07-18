@@ -59,6 +59,10 @@
   "Fermo": "Marche",
   "Rieti": "Lazio",
   "Frosinone": "Lazio",
+  "Viterbo": "Lazio",
+  "Roma": "Lazio",
+  "Grosseto": "Toscana",
+  "Siena": "Toscana",
   "Perugia": "Umbria",
   "Terni": "Umbria",
   "Avellino": "Campania",
@@ -645,6 +649,29 @@
     "Trento"
    ],
    "image": "images/29-Treviso-Trento.webp",
+   "result": {
+    "scores": {
+     "Treviso": 27,
+     "Trento": 46
+    },
+    "winner": "Trento",
+    "losers": [
+     "Treviso"
+    ]
+   }
+  },
+  {
+   "day": 30,
+   "type": "bonus",
+   "contenders": [
+    "Viterbo",
+    "Perugia",
+    "Rieti",
+    "Roma",
+    "Grosseto",
+    "Siena"
+   ],
+   "image": "images/30-BONUS-Viterbo-Perugia-Rieti-Roma-Grosseto-Siena.webp",
    "result": null
   }
  ]
