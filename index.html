@@ -20,12 +20,11 @@
 
   .headrule{border-top:2px solid #161616;margin:16px 0 22px}
   .cols{display:grid;grid-template-columns:minmax(300px,430px) 1fr;gap:30px;align-items:start}
-  .left{position:sticky;top:16px;align-self:start}
+  .left{position:sticky;top:16px;align-self:start;max-height:calc(100vh - 32px);overflow-y:auto;overflow-x:hidden}
   @media(max-width:840px){
     .cols{grid-template-columns:1fr;gap:8px}
-    .left{position:static}
+    .left{position:static;max-height:none;overflow:visible}
     .controls{position:fixed;left:0;right:0;bottom:0;margin:0;background:#fff;border-top:1px solid #161616;box-shadow:0 -2px 10px rgba(0,0,0,.10);padding:8px 8px;z-index:20;gap:7px}
-    .hint{display:none}
     .page{padding-bottom:108px}
     input[type=range]{flex:1 1 120px;min-width:100px;max-width:none}
   }
@@ -43,7 +42,6 @@
   input[type=range]{width:170px;max-width:60vw;accent-color:#161616}
   select{font-family:inherit;font-size:15px;border:1px solid #161616;background:#fff;padding:4px 6px;border-radius:0}
   label.ctl{font-family:inherit;font-size:15px;display:inline-flex;align-items:center;gap:6px;color:#333;cursor:pointer}
-  .hint{font-size:13.5px;color:#666;text-align:center;margin:4px 0 0}
 
   .match{margin-top:16px;border-top:1px solid #d8d8d8;padding-top:12px}
   .match h2{font-size:18px;margin:0 0 8px}
@@ -129,17 +127,15 @@ function buildShell(){
   const cap=el('figcaption'); fig.append(maps,cap); left.appendChild(fig);
 
   const ctr=el('div','controls');
-  const prev=el('button',null,'◀'); prev.title='Immagine precedente'; prev.onclick=()=>{stop();go(CUR-1)};
+  const prev=el('button',null,'⏮'); prev.title='Immagine precedente'; prev.onclick=()=>{stop();go(CUR-1)};
   const play=el('button','play','▶ play'); play.onclick=togglePlay;
   const stopb=el('button',null,'■'); stopb.title='Torna all’inizio'; stopb.onclick=()=>{stop();go(1)};
-  const next=el('button',null,'▶'); next.title='Immagine successiva'; next.onclick=()=>{stop();go(CUR+1)};
+  const next=el('button',null,'⏭'); next.title='Immagine successiva'; next.onclick=()=>{stop();go(CUR+1)};
   const slider=el('input'); slider.type='range'; slider.min=1; slider.max=DAYS.length; slider.value=CUR; slider.oninput=e=>{stop();go(+e.target.value)};
   const spd=el('select'); [['lento',1500],['normale',900],['veloce',500],['turbo',260]].forEach(([t,v])=>{const o=el('option',null,t);o.value=v;if(v===SPEED)o.selected=true;spd.appendChild(o);}); spd.onchange=e=>{SPEED=+e.target.value; if(PLAY){stop();start();}};
   const lp=el('label','ctl'); const lcb=el('input');lcb.type='checkbox';lcb.checked=LOOP;lcb.onchange=e=>{LOOP=e.target.checked;}; lp.append(lcb,document.createTextNode('ripeti'));
-  const sp=el('label','ctl'); const cbx=el('input');cbx.type='checkbox';cbx.checked=SPOIL;cbx.onchange=e=>{SPOIL=e.target.checked;update();}; sp.append(cbx,document.createTextNode('mostra risultati'));
-  ctr.append(prev,play,stopb,next,slider,spd,lp,sp);
+  ctr.append(prev,play,stopb,next,slider,spd,lp);
   left.appendChild(ctr);
-  left.appendChild(el('p','hint','usa le frecce sinistra e destra per spostarti tra immagini e la barra spaziatrice per mettere play e pausa'));
 
   const dynLeft=el('div','match'); left.appendChild(dynLeft);
   const dynRight=el('div'); right.appendChild(dynRight);
